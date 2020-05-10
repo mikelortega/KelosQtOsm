@@ -8,7 +8,7 @@
 #include "UTM.h"
 #include <map>
 
-std::map<long, QPointF> m_NodeGeoLocs;
+std::map<qlonglong, QPointF> m_NodeGeoLocs;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -49,7 +49,7 @@ void MainWindow::on_action_Open_triggered()
             QString name = xmlReader.name().toString();
             if (name == "node")
             {
-                long id = xmlReader.attributes().value("id").toLong();
+                qlonglong id = xmlReader.attributes().value("id").toLongLong();
                 double lat = xmlReader.attributes().value("lat").toDouble();
                 double lon = xmlReader.attributes().value("lon").toDouble();
 
@@ -76,9 +76,10 @@ void MainWindow::on_action_Open_triggered()
             if (name == "way")
                 poly.clear();
             if (name == "nd")
-                poly << m_NodeGeoLocs[xmlReader.attributes().value("ref").toLong()];
+                poly << m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()];
             if (name == "tag" && xmlReader.attributes().value("k") == "building")
                 m_Scene->addPolygon(poly, QPen(), QBrush(Qt::lightGray, Qt::SolidPattern));
+
         }
 
         xmlReader.readNext();
