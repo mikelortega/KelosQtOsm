@@ -42,6 +42,9 @@ void MainWindow::on_action_Open_triggered()
 
     QXmlStreamReader xmlReader(&file);
 
+    //
+    // Get all nodes and their positions
+    //
     while (!xmlReader.isEndDocument())
     {
         if (xmlReader.isStartElement())
@@ -63,10 +66,14 @@ void MainWindow::on_action_Open_triggered()
         xmlReader.readNext();
     }
 
+    //
+    // Parse again to find features
+    //
     file.seek(0); // to make QFile object pointing to begining
     xmlReader.setDevice(xmlReader.device());
 
     QPolygonF poly;
+    QPainterPath path;
 
     while (!xmlReader.isEndDocument())
     {
@@ -74,12 +81,30 @@ void MainWindow::on_action_Open_triggered()
         {
             QString name = xmlReader.name().toString();
             if (name == "way")
+            {
                 poly.clear();
+                path.clear();
+            }
             if (name == "nd")
+            {
                 poly << m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()];
-            if (name == "tag" && xmlReader.attributes().value("k") == "building")
-                m_Scene->addPolygon(poly, QPen(), QBrush(Qt::lightGray, Qt::SolidPattern));
+                if (path.currentPosition() == QPointF()) // First point
+                    path.moveTo(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
+                else // Draw line
+                    path.lineTo(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
+            }
 
+            if (name == "tag")
+            {
+                if (xmlReader.attributes().value("k") == "building")
+                    m_Scene->addPolygon(poly, QPen(), QBrush(Qt::lightGray, Qt::SolidPattern));
+
+                if (name == "tag" && xmlReader.attributes().value("k") == "highway")
+                    m_Scene->addPath(path, QPen());
+
+                if (name == "tag" && xmlReader.attributes().value("k") == "aeroway")
+                    m_Scene->addPath(path, QPen());
+            }
         }
 
         xmlReader.readNext();
