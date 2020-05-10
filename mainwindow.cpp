@@ -44,25 +44,24 @@ void MainWindow::on_action_Open_triggered()
     if(!file.open(QFile::ReadOnly | QFile::Text))
         QMessageBox::information(this, "Error", "Cannot read file: " + file.errorString());
 
-    QXmlStreamReader reader(&file);
+    QXmlStreamReader xmlReader(&file);
 
-    if (reader.readNextStartElement())
+    while (!xmlReader.isEndDocument())
     {
-        if (reader.name() == "root")
+        if (xmlReader.isStartElement())
         {
-            while(reader.readNextStartElement())
+            QString name = xmlReader.name().toString();
+            if (name == "node")
             {
-                if(reader.name() == "childA")
-                {
-                    QString s = reader.readElementText();
-                    //qDebug(qPrintable(s));
-                }
-                else
-                    reader.skipCurrentElement();
+                double lat = xmlReader.attributes().value("lat").toDouble();
+                double lon = xmlReader.attributes().value("lon").toDouble();
+
+                //QPoint()
+                //QMessageBox::information(this, "Error", "lat: " + QString::number(lat));
             }
         }
-        else
-            reader.raiseError(QObject::tr("Incorrect file"));
+
+        xmlReader.readNext();
     }
 
 }
