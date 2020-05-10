@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QXmlStreamReader>
+#include "UTM.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -12,11 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-
-
     m_Scene = new QGraphicsScene(this);
-    m_Scene->addText("Hello, world!");
-
+/*
     QPolygonF poly;
     poly << QPointF(10, 10) << QPointF(10, 50) << QPointF(30, 70 )<< QPointF(60, 50) << QPointF(50, 10);
     QPen pen(Qt::green);
@@ -24,10 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     brush.setColor(Qt::red);
     brush.setStyle(Qt::SolidPattern);
     m_Scene->addPolygon(poly, pen, brush);
-
+*/
     ui->graphicsView->setScene(m_Scene);
     ui->graphicsView->show();
-
 }
 
 MainWindow::~MainWindow()
@@ -38,13 +35,18 @@ MainWindow::~MainWindow()
 void MainWindow::on_action_Open_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open OSM File"), "", tr("Image Files (*.osm)"));
+        tr("Open OSM File"), "../KelosQtOSM/SampleFiles", tr("Image Files (*.osm)"));
 
     QFile file(fileName);
     if(!file.open(QFile::ReadOnly | QFile::Text))
+    {
         QMessageBox::information(this, "Error", "Cannot read file: " + file.errorString());
+        return;
+    }
 
     QXmlStreamReader xmlReader(&file);
+
+    QPolygonF poly;
 
     while (!xmlReader.isEndDocument())
     {
@@ -56,12 +58,18 @@ void MainWindow::on_action_Open_triggered()
                 double lat = xmlReader.attributes().value("lat").toDouble();
                 double lon = xmlReader.attributes().value("lon").toDouble();
 
-                //QPoint()
-                //QMessageBox::information(this, "Error", "lat: " + QString::number(lat));
+                double x, y;
+                LatLonToUTMXY(lat, lon, 30, x, y);
+
+                poly << QPointF(x * 0.1, -y * 0.1);
+
+                //m_Scene->addEllipse(x * 0.1, -y * 0.1, 1.0, 1.0, QPen(), QBrush(Qt::SolidPattern));
             }
         }
 
         xmlReader.readNext();
     }
+
+    m_Scene->addPolygon(poly, QPen(), QBrush(Qt::SolidPattern));
 
 }
