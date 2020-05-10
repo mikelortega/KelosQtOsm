@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_Scene = new QGraphicsScene(this);
 
     ui->graphicsView->setScene(m_Scene);
+    ui->graphicsView->setRenderHint( QPainter::Antialiasing );
     ui->graphicsView->show();
 }
 
@@ -55,7 +56,7 @@ void MainWindow::on_action_Open_triggered()
                 double x, y;
                 LatLonToUTMXY(lat, lon, 30, x, y);
 
-                m_NodeGeoLocs[id] = QPointF(x * 0.1, -y * 0.1);
+                m_NodeGeoLocs[id] = QPointF(x * 1, -y * 1);
             }
         }
 
@@ -77,7 +78,7 @@ void MainWindow::on_action_Open_triggered()
             if (name == "nd")
                 poly << m_NodeGeoLocs[xmlReader.attributes().value("ref").toLong()];
             if (name == "tag" && xmlReader.attributes().value("k") == "building")
-                m_Scene->addPolygon(poly, QPen(), QBrush(Qt::SolidPattern));
+                m_Scene->addPolygon(poly, QPen(), QBrush(Qt::lightGray, Qt::SolidPattern));
         }
 
         xmlReader.readNext();
