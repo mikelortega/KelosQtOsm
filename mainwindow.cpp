@@ -7,6 +7,7 @@
 #include <QXmlStreamReader>
 #include "UTM.h"
 #include <map>
+#include <QGraphicsItem>
 
 std::map<qlonglong, QPointF> m_NodeGeoLocs;
 
@@ -17,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     m_Scene = new QGraphicsScene(this);
+    m_Scene->setBackgroundBrush(QBrush(QColor(242, 239, 233), Qt::SolidPattern));
 
     ui->graphicsView->setScene(m_Scene);
     ui->graphicsView->setRenderHint( QPainter::Antialiasing );
@@ -40,6 +42,8 @@ void MainWindow::on_action_Open_triggered()
         return;
     }
 
+    m_Scene->clear();
+
     QXmlStreamReader xmlReader(&file);
 
     //
@@ -59,7 +63,7 @@ void MainWindow::on_action_Open_triggered()
                 double x, y;
                 LatLonToUTMXY(lat, lon, 30, x, y);
 
-                m_NodeGeoLocs[id] = QPointF(x * 1, -y * 1);
+                m_NodeGeoLocs[id] = QPointF(x, -y);
             }
         }
 
@@ -97,13 +101,42 @@ void MainWindow::on_action_Open_triggered()
             if (name == "tag")
             {
                 if (xmlReader.attributes().value("k") == "building")
-                    m_Scene->addPolygon(poly, QPen(), QBrush(Qt::lightGray, Qt::SolidPattern));
+                {
+                    QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(QColor(158, 136, 118)), QBrush(QColor(196, 182, 171), Qt::SolidPattern));
+                    item->setZValue(1);
+                }
 
-                if (name == "tag" && xmlReader.attributes().value("k") == "highway")
-                    m_Scene->addPath(path, QPen());
+                if (xmlReader.attributes().value("k") == "natural")
+                {
+                    if (xmlReader.attributes().value("v") == "grass" || xmlReader.attributes().value("v") == "grassland")
+                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(205, 235, 176), Qt::SolidPattern));
+                    else if (xmlReader.attributes().value("v") == "wood")
+                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(173, 209, 158), Qt::SolidPattern));
+                    else if (xmlReader.attributes().value("v") == "scrub")
+                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(200, 215, 171), Qt::SolidPattern));
+                }
 
-                if (name == "tag" && xmlReader.attributes().value("k") == "aeroway")
-                    m_Scene->addPath(path, QPen());
+                if (xmlReader.attributes().value("k") == "landuse")
+                    m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(205, 235, 176), Qt::SolidPattern));
+
+                if (xmlReader.attributes().value("k") == "highway")
+                {
+                    QGraphicsPathItem *item = m_Scene->addPath(path, QPen());
+                    item->setZValue(1);
+                }
+
+                if (xmlReader.attributes().value("k") == "aeroway")
+                {
+                    if (xmlReader.attributes().value("v") == "runway")
+                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(187, 187, 204), Qt::SolidPattern));
+                    else if (xmlReader.attributes().value("v") == "taxiway")
+                        m_Scene->addPath(path, QPen(QBrush(QColor(187, 187, 204)), 10));
+                    else
+                    {
+                        QGraphicsPathItem *item = m_Scene->addPath(path, QPen());
+                        item->setZValue(1);
+                    }
+                }
             }
         }
 
