@@ -87,7 +87,7 @@ void MainWindow::on_action_Open_triggered()
             if (name == "way")
             {
                 poly.clear();
-                path.clear();
+                path = QPainterPath();
             }
             if (name == "nd")
             {
@@ -117,7 +117,15 @@ void MainWindow::on_action_Open_triggered()
                 }
 
                 if (xmlReader.attributes().value("k") == "landuse")
-                    m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(205, 235, 176), Qt::SolidPattern));
+                {
+                    QColor color = QColor(205, 235, 176);
+                    if (xmlReader.attributes().value("v") == "industrial")
+                        color = QColor(236, 219, 232);
+                    if (xmlReader.attributes().value("v") == "brownfield")
+                        color = QColor(198, 199, 180);
+
+                    m_Scene->addPolygon(poly, Qt::NoPen, QBrush(color, Qt::SolidPattern));
+                }
 
                 if (xmlReader.attributes().value("k") == "highway")
                 {
@@ -142,4 +150,5 @@ void MainWindow::on_action_Open_triggered()
 
         xmlReader.readNext();
     }
+
 }
