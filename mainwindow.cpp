@@ -84,7 +84,7 @@ void MainWindow::on_action_Open_triggered()
         if (xmlReader.isStartElement())
         {
             QString name = xmlReader.name().toString();
-            if (name == "way")
+            if (name == "way" || name == "relation")
             {
                 poly.clear();
                 path = QPainterPath();
@@ -103,7 +103,7 @@ void MainWindow::on_action_Open_triggered()
                 if (xmlReader.attributes().value("k") == "building")
                 {
                     QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(QColor(158, 136, 118)), QBrush(QColor(196, 182, 171), Qt::SolidPattern));
-                    item->setZValue(1);
+                    item->setZValue(5);
                 }
 
                 if (xmlReader.attributes().value("k") == "natural")
@@ -129,8 +129,27 @@ void MainWindow::on_action_Open_triggered()
 
                 if (xmlReader.attributes().value("k") == "highway")
                 {
-                    QGraphicsPathItem *item = m_Scene->addPath(path, QPen());
-                    item->setZValue(1);
+                    if (xmlReader.attributes().value("v") == "footway" || xmlReader.attributes().value("v") == "footpath")
+                    {
+                        QPen pen = QPen(QBrush(Qt::blue), 1, Qt::DotLine);
+                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
+                        item->setZValue(1);
+                    }
+                    else
+                    {
+                        QPen pen = QPen(QBrush(Qt::black), 5);
+                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
+                        item->setZValue(1);
+                        pen = QPen(QBrush(Qt::white), 4);
+                        item = m_Scene->addPath(path, pen);
+                        item->setZValue(2);
+                        if (xmlReader.attributes().value("v") == "service")
+                        {
+                            QPen pen = QPen(QBrush(Qt::gray), 2, Qt::DotLine);
+                            item = m_Scene->addPath(path, pen);
+                            item->setZValue(3);
+                        }
+                    }
                 }
 
                 if (xmlReader.attributes().value("k") == "aeroway")
