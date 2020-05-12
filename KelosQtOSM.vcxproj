@@ -186,11 +186,13 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="KelosMapView.cpp" />
     <ClCompile Include="UTM.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="KelosMapView.h" />
     <ClInclude Include="UTM.h" />
     <QtMoc Include="mainwindow.h">
     </QtMoc>

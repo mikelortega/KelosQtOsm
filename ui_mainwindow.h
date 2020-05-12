@@ -12,13 +12,13 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include "KelosMapView.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -28,7 +28,7 @@ public:
     QAction *action_Open;
     QWidget *centralwidget;
     QHBoxLayout *horizontalLayout;
-    QGraphicsView *graphicsView;
+    KelosMapView *graphicsView;
     QMenuBar *menubar;
     QMenu *menu_File;
     QStatusBar *statusbar;
@@ -44,7 +44,7 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         horizontalLayout = new QHBoxLayout(centralwidget);
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        graphicsView = new QGraphicsView(centralwidget);
+        graphicsView = new KelosMapView(centralwidget);
         graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
         graphicsView->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
         QBrush brush(QColor(0, 0, 0, 255));
@@ -56,7 +56,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 633, 20));
+        menubar->setGeometry(QRect(0, 0, 633, 21));
         menu_File = new QMenu(menubar);
         menu_File->setObjectName(QString::fromUtf8("menu_File"));
         MainWindow->setMenuBar(menubar);
