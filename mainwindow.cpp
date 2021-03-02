@@ -133,9 +133,33 @@ void MainWindow::on_action_Open_triggered()
 
                 if (xmlReader.attributes().value("k") == "highway")
                 {
-                    if (xmlReader.attributes().value("v") == "footway" || xmlReader.attributes().value("v") == "footpath")
+                    if (xmlReader.attributes().value("v") == "footpath")
                     {
                         QPen pen = QPen(QBrush(Qt::blue), 1, Qt::DotLine);
+                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
+                        item->setZValue(2);
+                    }
+                    else if (xmlReader.attributes().value("v") == "path" || xmlReader.attributes().value("v") == "footway")
+                    {
+                        QPen pen = QPen(QBrush(Qt::red), 1, Qt::DotLine);
+                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
+                        item->setZValue(3);
+                        pen = QPen(QBrush(Qt::white), 1.5);
+                        item = m_Scene->addPath(path, pen);
+                        item->setZValue(2);
+                    }
+                    else if (xmlReader.attributes().value("v") == "track")
+                    {
+                        QPen pen = QPen(QBrush(Qt::GlobalColor::darkYellow), 1, Qt::DashDotLine);
+                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
+                        item->setZValue(3);
+                        pen = QPen(QBrush(Qt::white), 1.5);
+                        item = m_Scene->addPath(path, pen);
+                        item->setZValue(2);
+                    }
+                    else if (xmlReader.attributes().value("v") == "steps")
+                    {
+                        QPen pen = QPen(QBrush(Qt::GlobalColor::red), 1.5, Qt::DotLine);
                         QGraphicsPathItem *item = m_Scene->addPath(path, pen);
                         item->setZValue(2);
                     }
