@@ -106,6 +106,18 @@ void MainWindow::on_action_Open_triggered()
                     item->setZValue(5);
                 }
 
+                if (xmlReader.attributes().value("k") == "leisure")
+                {
+                    QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(QColor(156, 214, 191)), QBrush(QColor(170, 224, 203), Qt::SolidPattern));
+                    item->setZValue(1);
+                }
+
+                if (xmlReader.attributes().value("k") == "amenity")
+                {
+                    QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(Qt::GlobalColor::gray), QBrush(QColor(238, 238, 238), Qt::SolidPattern));
+                    item->setZValue(1);
+                }
+
                 if (xmlReader.attributes().value("k") == "natural")
                 {
                     if (xmlReader.attributes().value("v") == "grass" || xmlReader.attributes().value("v") == "grassland")
@@ -129,6 +141,13 @@ void MainWindow::on_action_Open_triggered()
                         color = QColor(171, 210, 159);
 
                     m_Scene->addPolygon(poly, Qt::NoPen, QBrush(color, Qt::SolidPattern));
+                }
+
+                if (xmlReader.attributes().value("k") == "railway")
+                {
+                    QPen pen = QPen(QBrush(Qt::GlobalColor::darkGray), 2);
+                    QGraphicsPathItem *item = m_Scene->addPath(path, pen);
+                    item->setZValue(2);
                 }
 
                 if (xmlReader.attributes().value("k") == "highway")
@@ -171,12 +190,12 @@ void MainWindow::on_action_Open_triggered()
                         pen = QPen(QBrush(Qt::white), 4);
                         item = m_Scene->addPath(path, pen);
                         item->setZValue(3);
-                        if (xmlReader.attributes().value("v") == "service")
-                        {
-                            QPen pen = QPen(QBrush(Qt::gray), 2, Qt::DotLine);
-                            item = m_Scene->addPath(path, pen);
-                            item->setZValue(4);
-                        }
+                        //if (xmlReader.attributes().value("v") == "service")
+                        //{
+                        //    QPen pen = QPen(QBrush(Qt::gray), 2, Qt::DotLine);
+                        //    item = m_Scene->addPath(path, pen);
+                        //    item->setZValue(4);
+                        //}
                     }
                 }
 
