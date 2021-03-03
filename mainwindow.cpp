@@ -30,6 +30,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+struct wayStruct
+{
+    QList<QPointF> points;
+    QMap<QString, QString> tags;
+};
+
+void DrawPolyWay(QGraphicsScene *scene, wayStruct way, QColor lineColor, QColor fillColor, float zValue)
+{
+    QPolygonF poly;
+    for (int i=0; i < way.points.count(); ++i)
+        poly << way.points[i];
+
+    QGraphicsPolygonItem *item = scene->addPolygon(poly, QPen(lineColor), QBrush(fillColor, Qt::SolidPattern));
+    item->setZValue(zValue);
+}
+
 void MainWindow::on_action_Open_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -79,6 +95,9 @@ void MainWindow::on_action_Open_triggered()
     QPolygonF poly;
     QPainterPath path;
 
+    wayStruct way;
+    QList<wayStruct> wayList = QList<wayStruct>();
+
     while (!xmlReader.isEndDocument())
     {
         if (xmlReader.isStartElement())
@@ -88,6 +107,10 @@ void MainWindow::on_action_Open_triggered()
             {
                 poly.clear();
                 path = QPainterPath();
+
+                wayList.append(way);
+                way.points = QList<QPointF>();
+                way.tags = QMap<QString,QString>();
             }
             if (name == "nd")
             {
@@ -96,27 +119,13 @@ void MainWindow::on_action_Open_triggered()
                     path.moveTo(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
                 else // Draw line
                     path.lineTo(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
+
+                way.points.append(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
             }
 
             if (name == "tag")
             {
-                if (xmlReader.attributes().value("k") == "building")
-                {
-                    QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(QColor(158, 136, 118)), QBrush(QColor(196, 182, 171), Qt::SolidPattern));
-                    item->setZValue(10);
-                }
-
-                if (xmlReader.attributes().value("k") == "leisure")
-                {
-                    QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(QColor(156, 214, 191)), QBrush(QColor(170, 224, 203), Qt::SolidPattern));
-                    item->setZValue(1);
-                }
-
-                if (xmlReader.attributes().value("k") == "amenity")
-                {
-                    QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(Qt::GlobalColor::gray), QBrush(QColor(238, 238, 238), Qt::SolidPattern));
-                    item->setZValue(1);
-                }
+                way.tags[xmlReader.attributes().value("k").toString()] = xmlReader.attributes().value("v").toString();
 
                 if (xmlReader.attributes().value("k") == "natural")
                 {
@@ -231,4 +240,18 @@ void MainWindow::on_action_Open_triggered()
         xmlReader.readNext();
     }
 
+    for (int i=0; i < wayList.count(); ++i)
+    {
+        wayStruct way = wayList[i];
+
+        if (way.tags.contains("building"))
+            DrawPolyWay(m_Scene, way, QColor(158, 136, 118), QColor(196, 182, 171), 10);
+
+        if (way.tags.contains("leisure"))
+            DrawPolyWay(m_Scene, way, QColor(156, 214, 191), QColor(170, 224, 203), 1);
+
+        if (way.tags.contains("amenity"))
+            DrawPolyWay(m_Scene, way, Qt::GlobalColor::gray, QColor(238, 238, 238), 1);
+    }
 }
+
