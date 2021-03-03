@@ -103,7 +103,7 @@ void MainWindow::on_action_Open_triggered()
                 if (xmlReader.attributes().value("k") == "building")
                 {
                     QGraphicsPolygonItem *item = m_Scene->addPolygon(poly, QPen(QColor(158, 136, 118)), QBrush(QColor(196, 182, 171), Qt::SolidPattern));
-                    item->setZValue(5);
+                    item->setZValue(10);
                 }
 
                 if (xmlReader.attributes().value("k") == "leisure")
@@ -120,24 +120,26 @@ void MainWindow::on_action_Open_triggered()
 
                 if (xmlReader.attributes().value("k") == "natural")
                 {
-                    if (xmlReader.attributes().value("v") == "grass" || xmlReader.attributes().value("v") == "grassland")
+                    QStringRef v = xmlReader.attributes().value("v");
+                    if (v == "grass" || v == "grassland")
                         m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(205, 235, 176), Qt::SolidPattern));
-                    else if (xmlReader.attributes().value("v") == "wood")
+                    else if (v == "wood")
                         m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(173, 209, 158), Qt::SolidPattern));
-                    else if (xmlReader.attributes().value("v") == "scrub")
+                    else if (v == "scrub")
                         m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(200, 215, 171), Qt::SolidPattern));
                 }
 
                 if (xmlReader.attributes().value("k") == "landuse")
                 {
                     QColor color = QColor(205, 235, 176);
-                    if (xmlReader.attributes().value("v") == "industrial")
+                    QStringRef v = xmlReader.attributes().value("v");
+                    if (v == "industrial")
                         color = QColor(236, 219, 232);
-                    if (xmlReader.attributes().value("v") == "brownfield")
+                    if (v == "brownfield")
                         color = QColor(198, 199, 180);
-                    if (xmlReader.attributes().value("v") == "residential")
+                    if (v == "residential")
                         color = QColor(224, 223, 223);
-                    if (xmlReader.attributes().value("v") == "forest")
+                    if (v == "forest")
                         color = QColor(171, 210, 159);
 
                     m_Scene->addPolygon(poly, Qt::NoPen, QBrush(color, Qt::SolidPattern));
@@ -152,15 +154,14 @@ void MainWindow::on_action_Open_triggered()
 
                 if (xmlReader.attributes().value("k") == "highway")
                 {
-                    if (xmlReader.attributes().value("v") == "footpath")
+                    QStringRef v = xmlReader.attributes().value("v");
+                    if (v == "footpath" || v == "path" || v == "footway")
                     {
-                        QPen pen = QPen(QBrush(Qt::blue), 1, Qt::DotLine);
-                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                        item->setZValue(2);
-                    }
-                    else if (xmlReader.attributes().value("v") == "path" || xmlReader.attributes().value("v") == "footway")
-                    {
-                        QPen pen = QPen(QBrush(Qt::red), 1, Qt::DotLine);
+                        QColor color = Qt::GlobalColor::red;
+                        if (v == "path")
+                            color = Qt::GlobalColor::blue;
+
+                        QPen pen = QPen(QBrush(color), 1, Qt::DotLine);
                         QGraphicsPathItem *item = m_Scene->addPath(path, pen);
                         item->setZValue(3);
                         pen = QPen(QBrush(Qt::white), 1.5);
@@ -186,10 +187,10 @@ void MainWindow::on_action_Open_triggered()
                     {
                         QPen pen = QPen(QBrush(Qt::black), 5);
                         QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                        item->setZValue(2);
+                        item->setZValue(5);
                         pen = QPen(QBrush(Qt::white), 4);
                         item = m_Scene->addPath(path, pen);
-                        item->setZValue(3);
+                        item->setZValue(6);
                         //if (xmlReader.attributes().value("v") == "service")
                         //{
                         //    QPen pen = QPen(QBrush(Qt::gray), 2, Qt::DotLine);
@@ -201,11 +202,12 @@ void MainWindow::on_action_Open_triggered()
 
                 if (xmlReader.attributes().value("k") == "aeroway")
                 {
-                    if (xmlReader.attributes().value("v") == "runway")
+                    QStringRef v = xmlReader.attributes().value("v");
+                    if (v == "runway")
                         m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(187, 187, 204), Qt::SolidPattern));
-                    if (xmlReader.attributes().value("v") == "apron")
+                    if (v == "apron")
                         m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(218, 218, 224), Qt::SolidPattern));
-                    else if (xmlReader.attributes().value("v") == "taxiway")
+                    else if (v == "taxiway")
                     {
                         QGraphicsPathItem *item = m_Scene->addPath(path, QPen(QBrush(QColor(187, 187, 204)), 10));
                         item->setZValue(1);
