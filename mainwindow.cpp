@@ -38,12 +38,15 @@ struct wayStruct
 
 void DrawPolyWay(QGraphicsScene *scene, wayStruct way, QColor lineColor, QColor fillColor, float zValue)
 {
-    QPolygonF poly;
-    for (int i=0; i < way.points.count(); ++i)
-        poly << way.points[i];
+    if (way.points.length() > 0)
+    {
+        QPolygonF poly;
+        for (int i=0; i < way.points.count(); ++i)
+            poly << way.points[i];
 
-    QGraphicsPolygonItem *item = scene->addPolygon(poly, QPen(lineColor), QBrush(fillColor, Qt::SolidPattern));
-    item->setZValue(zValue);
+        QGraphicsPolygonItem *item = scene->addPolygon(poly, QPen(lineColor), QBrush(fillColor, Qt::SolidPattern));
+        item->setZValue(zValue);
+    }
 }
 
 void DrawPathWay(QGraphicsScene *scene, wayStruct way, QColor color, Qt::PenStyle style, float width, float zValue)
@@ -136,10 +139,30 @@ void MainWindow::on_action_Open_triggered()
         wayStruct way = wayList[i];
 
         if (way.tags.contains("building"))
+        {
             DrawPolyWay(m_Scene, way, QColor(158, 136, 118), QColor(196, 182, 171), 10);
 
+            if (way.tags.contains("name") && way.points.length() > 0)
+            {
+                QGraphicsTextItem *text = m_Scene->addText(way.tags["name"]);
+                text->setDefaultTextColor(QColor(158, 136, 118));
+                text->setPos(way.points[0]);
+                text->setZValue(100);
+            }
+        }
+
         if (way.tags.contains("leisure"))
+        {
             DrawPolyWay(m_Scene, way, QColor(156, 214, 191), QColor(170, 224, 203), 1);
+
+            if (way.tags.contains("name") && way.points.length() > 0)
+            {
+                QGraphicsTextItem *text = m_Scene->addText(way.tags["name"]);
+                text->setDefaultTextColor(Qt::GlobalColor::darkGreen);
+                text->setPos(way.points[0]);
+                text->setZValue(100);
+            }
+        }
 
         if (way.tags.contains("amenity"))
             DrawPolyWay(m_Scene, way, Qt::GlobalColor::gray, QColor(238, 238, 238), 1);
@@ -195,7 +218,8 @@ void MainWindow::on_action_Open_triggered()
             }
             else if (v == "steps")
             {
-                DrawPathWay(m_Scene, way, Qt::white, Qt::PenStyle::DotLine, 1.5, 2);
+                DrawPathWay(m_Scene, way, Qt::GlobalColor::red, Qt::PenStyle::DotLine, 1.2, 3);
+                DrawPathWay(m_Scene, way, Qt::white, Qt::PenStyle::SolidLine, 1.5, 2);
             }
             else
             {
