@@ -106,9 +106,6 @@ void MainWindow::on_action_Open_triggered()
     file.seek(0); // to make QFile object pointing to begining
     xmlReader.setDevice(xmlReader.device());
 
-    QPolygonF poly;
-    QPainterPath path;
-
     wayStruct way;
     QList<wayStruct> wayList = QList<wayStruct>();
 
@@ -119,23 +116,13 @@ void MainWindow::on_action_Open_triggered()
             QString name = xmlReader.name().toString();
             if (name == "way" || name == "relation")
             {
-                poly.clear();
-                path = QPainterPath();
-
                 wayList.append(way);
                 way.points = QList<QPointF>();
                 way.tags = QMap<QString,QString>();
             }
-            if (name == "nd")
-            {
-                poly << m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()];
-                if (path.currentPosition() == QPointF()) // First point
-                    path.moveTo(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
-                else // Draw line
-                    path.lineTo(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
 
+            if (name == "nd")
                 way.points.append(m_NodeGeoLocs[xmlReader.attributes().value("ref").toLongLong()]);
-            }
 
             if (name == "tag")
                 way.tags[xmlReader.attributes().value("k").toString()] = xmlReader.attributes().value("v").toString();
