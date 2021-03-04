@@ -46,10 +46,24 @@ void DrawPolyWay(QGraphicsScene *scene, wayStruct way, QColor lineColor, QColor 
     item->setZValue(zValue);
 }
 
+void DrawPathWay(QGraphicsScene *scene, wayStruct way, QColor color, Qt::PenStyle style, float width, float zValue)
+{
+    if (way.points.length() > 1)
+    {
+        QPainterPath path;
+        path.moveTo(way.points[0]);
+        for (int i=1; i < way.points.count(); ++i)
+            path.lineTo(way.points[i]);
+
+        QPen pen = QPen(QBrush(color), width, style);
+        QGraphicsPathItem *item = scene->addPath(path, pen);
+        item->setZValue(zValue);
+    }
+}
+
 void MainWindow::on_action_Open_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open OSM File"), "../KelosQtOSM/SampleFiles", tr("Image Files (*.osm)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open OSM File"), "../KelosQtOSM/SampleFiles", tr("Image Files (*.osm)"));
 
     QFile file(fileName);
     if(!file.open(QFile::ReadOnly | QFile::Text))
@@ -124,117 +138,7 @@ void MainWindow::on_action_Open_triggered()
             }
 
             if (name == "tag")
-            {
                 way.tags[xmlReader.attributes().value("k").toString()] = xmlReader.attributes().value("v").toString();
-
-                if (xmlReader.attributes().value("k") == "natural")
-                {
-                    QStringRef v = xmlReader.attributes().value("v");
-                    if (v == "grass" || v == "grassland")
-                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(205, 235, 176), Qt::SolidPattern));
-                    else if (v == "wood")
-                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(173, 209, 158), Qt::SolidPattern));
-                    else if (v == "scrub")
-                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(200, 215, 171), Qt::SolidPattern));
-                }
-
-                if (xmlReader.attributes().value("k") == "landuse")
-                {
-                    QColor color = QColor(205, 235, 176);
-                    QStringRef v = xmlReader.attributes().value("v");
-                    if (v == "industrial")
-                        color = QColor(236, 219, 232);
-                    if (v == "brownfield")
-                        color = QColor(198, 199, 180);
-                    if (v == "residential")
-                        color = QColor(224, 223, 223);
-                    if (v == "forest")
-                        color = QColor(171, 210, 159);
-
-                    m_Scene->addPolygon(poly, Qt::NoPen, QBrush(color, Qt::SolidPattern));
-                }
-
-                if (xmlReader.attributes().value("k") == "railway")
-                {
-                    QPen pen = QPen(QBrush(Qt::GlobalColor::darkGray), 2);
-                    QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                    item->setZValue(2);
-                }
-
-                if (xmlReader.attributes().value("k") == "highway")
-                {
-                    QStringRef v = xmlReader.attributes().value("v");
-                    if (v == "footpath" || v == "path" || v == "footway")
-                    {
-                        QColor color = Qt::GlobalColor::red;
-                        if (v == "path")
-                            color = Qt::GlobalColor::blue;
-
-                        QPen pen = QPen(QBrush(color), 1, Qt::DotLine);
-                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                        item->setZValue(3);
-                        pen = QPen(QBrush(Qt::white), 1.5);
-                        item = m_Scene->addPath(path, pen);
-                        item->setZValue(2);
-                    }
-                    else if (xmlReader.attributes().value("v") == "track")
-                    {
-                        QPen pen = QPen(QBrush(Qt::GlobalColor::darkYellow), 1, Qt::DashDotLine);
-                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                        item->setZValue(3);
-                        pen = QPen(QBrush(Qt::white), 1.5);
-                        item = m_Scene->addPath(path, pen);
-                        item->setZValue(2);
-                    }
-                    else if (xmlReader.attributes().value("v") == "steps")
-                    {
-                        QPen pen = QPen(QBrush(Qt::GlobalColor::red), 1.5, Qt::DotLine);
-                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                        item->setZValue(2);
-                    }
-                    else
-                    {
-                        QPen pen = QPen(QBrush(Qt::black), 5);
-                        QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                        item->setZValue(5);
-                        pen = QPen(QBrush(Qt::white), 4);
-                        item = m_Scene->addPath(path, pen);
-                        item->setZValue(6);
-                        //if (xmlReader.attributes().value("v") == "service")
-                        //{
-                        //    QPen pen = QPen(QBrush(Qt::gray), 2, Qt::DotLine);
-                        //    item = m_Scene->addPath(path, pen);
-                        //    item->setZValue(4);
-                        //}
-                    }
-                }
-
-                if (xmlReader.attributes().value("k") == "aeroway")
-                {
-                    QStringRef v = xmlReader.attributes().value("v");
-                    if (v == "runway")
-                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(187, 187, 204), Qt::SolidPattern));
-                    if (v == "apron")
-                        m_Scene->addPolygon(poly, Qt::NoPen, QBrush(QColor(218, 218, 224), Qt::SolidPattern));
-                    else if (v == "taxiway")
-                    {
-                        QGraphicsPathItem *item = m_Scene->addPath(path, QPen(QBrush(QColor(187, 187, 204)), 10));
-                        item->setZValue(1);
-                    }
-                    else
-                    {
-                        QGraphicsPathItem *item = m_Scene->addPath(path, QPen());
-                        item->setZValue(2);
-                    }
-                }
-
-                if (xmlReader.attributes().value("k") == "waterway")
-                {
-                    QPen pen = QPen(QBrush(QColor(170, 210, 223)), 5);
-                    QGraphicsPathItem *item = m_Scene->addPath(path, pen);
-                    item->setZValue(1);
-                }
-            }
         }
 
         xmlReader.readNext();
@@ -252,6 +156,92 @@ void MainWindow::on_action_Open_triggered()
 
         if (way.tags.contains("amenity"))
             DrawPolyWay(m_Scene, way, Qt::GlobalColor::gray, QColor(238, 238, 238), 1);
+
+        if (way.tags.contains("natural"))
+        {
+            QColor color = QColor(205, 235, 176);
+            if (way.tags["natural"] == "grass" || way.tags["natural"] == "grassland")
+                color = QColor(205, 235, 176);
+            else if (way.tags["natural"] == "wood")
+                color = QColor(173, 209, 158);
+            else if (way.tags["natural"] == "scrub")
+                color = QColor(200, 215, 171);
+
+            DrawPolyWay(m_Scene, way, color, color, 0);
+        }
+
+        if (way.tags.contains("landuse"))
+        {
+            QColor color = QColor(205, 235, 176);
+            QString v = way.tags["landuse"];
+            if (v == "industrial")
+                color = QColor(236, 219, 232);
+            else if (v == "brownfield")
+                color = QColor(198, 199, 180);
+            else if (v == "residential")
+                color = QColor(224, 223, 223);
+            else if (v == "forest")
+                color = QColor(171, 210, 159);
+
+            DrawPolyWay(m_Scene, way, color, color, 0);
+        }
+
+        if (way.tags.contains("railway"))
+            DrawPathWay(m_Scene, way, Qt::GlobalColor::darkGray, Qt::PenStyle::SolidLine, 2, 2);
+
+        if (way.tags.contains("highway"))
+        {
+            QString v = way.tags["highway"];
+            if (v == "footpath" || v == "path" || v == "footway")
+            {
+                QColor color = Qt::GlobalColor::red;
+                if (way.tags.contains("bicycle"))
+                    color = Qt::GlobalColor::blue;
+
+                DrawPathWay(m_Scene, way, color, Qt::PenStyle::DotLine, 1, 3);
+                DrawPathWay(m_Scene, way, Qt::white, Qt::PenStyle::SolidLine, 1.5, 2);
+            }
+            else if (v == "track")
+            {
+                DrawPathWay(m_Scene, way, Qt::GlobalColor::darkYellow, Qt::PenStyle::DashDotLine, 1, 3);
+                DrawPathWay(m_Scene, way, Qt::white, Qt::PenStyle::SolidLine, 1.5, 2);
+            }
+            else if (v == "steps")
+            {
+                DrawPathWay(m_Scene, way, Qt::white, Qt::PenStyle::DotLine, 1.5, 2);
+            }
+            else
+            {
+                if (way.tags.contains("area"))
+                {
+                    DrawPolyWay(m_Scene, way, Qt::GlobalColor::gray, QColor(238, 238, 238), 1);
+                }
+                else
+                {
+                    DrawPathWay(m_Scene, way, Qt::black, Qt::PenStyle::SolidLine, 5, 5);
+                    DrawPathWay(m_Scene, way, Qt::white, Qt::PenStyle::SolidLine, 4, 6);
+                }
+            }
+        }
+
+        if (way.tags.contains("aeroway"))
+        {
+            QString v = way.tags["aeroway"];
+            if (v == "runway")
+                DrawPolyWay(m_Scene, way, QColor(187, 187, 204), QColor(187, 187, 204), 0);
+            if (v == "apron")
+                DrawPolyWay(m_Scene, way, QColor(218, 218, 224), QColor(218, 218, 224), 0);
+            else if (v == "taxiway")
+                DrawPathWay(m_Scene, way, QColor(187, 187, 204), Qt::PenStyle::SolidLine, 10, 1);
+            else
+                DrawPathWay(m_Scene, way, Qt::gray, Qt::PenStyle::SolidLine, 5, 2);
+        }
+
+        if (way.tags.contains("waterway"))
+        {
+            DrawPathWay(m_Scene, way, QColor(170, 210, 223), Qt::PenStyle::SolidLine, 5, 1);
+        }
+
     }
 }
 
